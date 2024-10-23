@@ -1,0 +1,22 @@
+###
+POST http://localhost:5001/start_game
+Content-Type: application/x-www-form-urlencoded
+
+config=
+{
+    "players" :31
+}
+
+
+###
+GET http://localhost:5001/query_game
+Content-Type: application/x-www-form-urlencoded
+
+###
+GET http://localhost:5001/pause_game
+Content-Type: application/x-www-form-urlencoded
+
+###
+POST http://localhost:5001/stop_game
+
+Content-Type: application/x-www-form-urlencoded
