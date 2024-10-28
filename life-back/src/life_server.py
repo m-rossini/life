@@ -5,8 +5,6 @@ import logging
 import game_management
 import json
 
-logging.basicConfig(level=logging.DEBUG)
-
 major_version = 0
 minor_version = 1
 modification_version = 0
@@ -28,8 +26,11 @@ def start_game():
 
 @app.route('/pause_game', methods=['GET'])
 def pause_game():
-    game_status = game_engine.pause()
-    return jsonify({"response": "success", "game" : game_status}), 200
+    if game_engine is not None:
+        game_status = game_engine.pause()
+        return jsonify({"response": "success", "game" : game_status}), 200
+    else:
+        return jsonify({"response": "failure", "game" : "Not started"}), 400
 
 @app.route('/stop_game', methods=['POST'])
 def stop_game():
@@ -38,8 +39,11 @@ def stop_game():
 
 @app.route('/query_game', methods=['GET'])
 def query_game():
-    game_status = game_engine.status()
-    return jsonify({"response": "success","status" : game_status}), 200
+    if game_engine is not None:
+        game_status = game_engine.status()
+        return jsonify({"response": "success","status" : game_status}), 200
+    else:
+        return jsonify({"response": "failure","status" : "Not started"}), 400
    
 def parse_args(parser):
     parser.add_argument('-P', '--port', type=int,
@@ -50,10 +54,17 @@ def parse_args(parser):
         '-D', '--debug', action='store_true', help='Debug mode')
     return parser.parse_args()
 
-if __name__ == '__main__':
+def process():
+    #TODO Handle debugging according to the parameter
     arg = parse_args(argparse.ArgumentParser())
-    logging.info("host:", arg.host, " port:", arg.port)
+    level = logging.DEBUG if arg.debug is True else logging.INFO 
+    app.logger.setLevel(level=level)
+    logging.basicConfig(level=level)
+    logging.debug(f"host:{arg.host} port: {arg.port} debug: {arg.debug}")
     
+    
+    app.run(host=arg.host, port=arg.port, debug=arg.debug)
+
+if __name__ == '__main__':
     game_engine = game_management.Game()
-    
-    app.run(host='0.0.0.0', port=arg.port, debug=arg.debug)
+    process()
