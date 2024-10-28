@@ -7,9 +7,11 @@ class GameCondition(Enum):
     STOPPED=3
 
 class GameStatus:
-    def __init__(self, condition,players=[]):
+    def __init__(self, condition, players=[]):
         self._condition : GameCondition=condition
         self._players : List = players
+        self._round : int=0
+        self._current_player : int =0
     
     @property
     def players(self):
@@ -20,7 +22,7 @@ class GameStatus:
         if not isinstance(value, List):
             raise ValueError("Players must be a list")
         
-        self._hlayers = value        
+        self._players = value        
 
     @property
     def condition(self):
@@ -33,23 +35,36 @@ class GameStatus:
         
         self._condition = value
 
+    @property
+    def round(self):
+        return self._round
+    
+    @property
+    def current_player(self):
+        return self._current_player
+    
+    def next_round(self):
+        self._round += 1
+        #for each player call assess and then play
+
     def to_dict(self):
         return {
             'condition': self.condition.name if self.condition in GameCondition else 'UNKNOWN',
-            'players': self._players
+            'players': self._players,
+            'total_players' : self._total_players,
+            'round' : self.round,
+            'current_player' : self.current_player
         }
 
 class Game:
     def __init__(self):
         self.game_status=GameStatus(GameCondition.STOPPED)
-        self.round=0
-        self.current_player=0
 
     def start(self, players):
         self.game_status.condition=GameCondition.STARTED
         self.game_status.players = self.__create_players(players.get('human',[]), players.get('computer',16))
-        self.current_player=1
-        self.round=1
+        #self.game_status.next_player()
+        self.game_status.next_round()
         return self.status()
     
     def __create_players(self, humans, computer):
@@ -67,7 +82,5 @@ class Game:
     def status(self):
         full_status = {
             'GameStatus' : self.game_status.to_dict(),
-            'round' : self.round,
-            'currentPlayer' : self.current_player
         }
         return full_status
