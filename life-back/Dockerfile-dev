@@ -10,7 +10,8 @@ RUN apt-get update && \
         iputils-ping \
         telnet \
         net-tools \
-        libpq-dev 
+        libpq-dev \
+        git
 
 # App image
 FROM python-base-dev AS python-base-requirements-dev
